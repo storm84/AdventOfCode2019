@@ -16,7 +16,7 @@ async function tryAllPhaseCombinations() {
         .toString(5)
         .substr(1)
         .split("")
-        .map(x => +x+5)
+        .map(x => +x + 5)
     )
     .filter(
       x =>
@@ -143,18 +143,30 @@ class Stream {
  * @param {Stream} output
  */
 async function run(prefix, p, input, output) {
+  const MODE_POSITION = 0;
+  const MODE_IMMEDIATE = 1;
+  const OP_HALT = 99;
+  const OP_ADD = 1;
+  const OP_MULT = 2;
+  const OP_READ = 3;
+  const OP_WRITE = 4;
+  const OP_JUMP_IF_TRUE = 5;
+  const OP_JUMP_IF_FALSE = 6;
+  const OP_LESS_THAN = 7;
+  const OP_EQUALS = 8;
+
   const opNumArgs = {
-    1: 3,
-    2: 3,
-    3: 1,
-    4: 1,
-    5: 2,
-    6: 2,
-    7: 3,
-    8: 3,
+    [OP_ADD]: 3,
+    [OP_MULT]: 3,
+    [OP_READ]: 1,
+    [OP_WRITE]: 1,
+    [OP_JUMP_IF_TRUE]: 2,
+    [OP_JUMP_IF_FALSE]: 2,
+    [OP_LESS_THAN]: 3,
+    [OP_EQUALS]: 3,
   };
 
-  for (let i = 0, counter = 0; p[i] !== 99; counter++) {
+  for (let i = 0, counter = 0; p[i] !== OP_HALT; counter++) {
     if (counter > 500) {
       console.error(output);
       throw prefix + "counter stop";
@@ -174,10 +186,9 @@ async function run(prefix, p, input, output) {
     const a2Mode = Math.floor(p[i] / 1000) % 10;
     const a3Mode = Math.floor(p[i] / 10000) % 10;
 
-    // 0 = position; 1 = immediate
-    if (a1Mode === 0) a1Val = p[a1];
-    if (a2Mode === 0) a2Val = p[a2];
-    if (a3Mode === 0) a3Val = p[a3];
+    if (a1Mode === MODE_POSITION) a1Val = p[a1];
+    if (a2Mode === MODE_POSITION) a2Val = p[a2];
+    if (a3Mode === MODE_POSITION) a3Val = p[a3];
 
     const numArgs = opNumArgs[op];
 
@@ -195,31 +206,31 @@ async function run(prefix, p, input, output) {
     }
 
     switch (op) {
-      case 1:
+      case OP_ADD:
         p[a3] = a1Val + a2Val;
         break;
-      case 2:
+      case OP_MULT:
         p[a3] = a1Val * a2Val;
         break;
-      case 3:
+      case OP_READ:
         const result = await input.read();
         // console.log(prefix + "read", result);
         p[a1] = result;
         break;
-      case 4:
+      case OP_WRITE:
         // console.log(prefix + "write", a1Val);
         output.write(a1Val);
         break;
-      case 5:
+      case OP_JUMP_IF_TRUE:
         if (a1Val !== 0) i = a2Val;
         break;
-      case 6:
+      case OP_JUMP_IF_FALSE:
         if (a1Val === 0) i = a2Val;
         break;
-      case 7:
+      case OP_LESS_THAN:
         p[a3] = a1Val < a2Val ? 1 : 0;
         break;
-      case 8:
+      case OP_EQUALS:
         p[a3] = a1Val === a2Val ? 1 : 0;
         break;
       default:
