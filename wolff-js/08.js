@@ -44,7 +44,7 @@ function calc2(input) {
 
   const realResult = [];
   result
-    .map(x => (x === "0" ? "." : x))
+    .map(x => (x === "0" ? " " : x))
     .join("")
     .replace(/.{25}/g, match => realResult.push(match));
   return realResult;
