@@ -1,4 +1,4 @@
-require("./helpers");
+require("./util");
 
 console.log(calc(getInput()));
 

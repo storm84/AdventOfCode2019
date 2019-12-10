@@ -1,4 +1,4 @@
-const { LinkedList } = require("../helpers");
+const { LinkedList } = require("../util");
 
 // console.log(calc1(getInput()).max());
 console.log(calc2(getInput()).max());
