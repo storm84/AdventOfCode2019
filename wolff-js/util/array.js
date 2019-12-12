@@ -1,4 +1,6 @@
-Array.prototype.sum = function() {};
+Array.prototype.sum = function() {
+  return this.reduce((a, b) => a + b);
+};
 
 Array.prototype.max = function() {
   return Math.max(...this);
