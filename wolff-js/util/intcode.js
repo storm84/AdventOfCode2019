@@ -26,6 +26,10 @@ class Stream {
     }
   }
 
+  hasNext() {
+    return this._lastIndex + 1 < this.values.length;
+  }
+
   async read() {
     this._log("read", {
       lastIndex: this._lastIndex,
@@ -132,7 +136,7 @@ async function run(prefix, p, input, output) {
   let relativeBase = 0;
 
   for (let i = 0, counter = 0; p[i] !== OP_HALT; counter++) {
-    if (counter > 500000) {
+    if (counter > 5000000) {
       console.error(output);
       throw prefix + "counter stop";
     }
