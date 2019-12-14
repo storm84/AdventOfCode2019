@@ -9,6 +9,10 @@ Array.prototype.min = function() {
   return Math.min(...this);
 };
 
+Array.prototype.distinct = function() {
+  return Array.from(new Set(this));
+};
+
 Array.prototype.groupBy = function(predicate) {
   const map = new Map();
   for (const item of this) {
