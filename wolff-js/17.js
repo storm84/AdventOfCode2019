@@ -1,28 +1,25 @@
-const { Stream, run, LocationMap } = require("./util");
+const { IntCode, LocationMap } = require("./util");
 
 setTimeout(async () => {
-  console.log(await calc([], getInput()));
+  console.log(await calc(getInput()));
 });
 
-async function calc(programInput, program) {
-  program = program
-    .trim()
-    .split(",")
-    .map(x => +x);
+/**
+ * @param {string} input
+ */
+async function calc(input) {
+  const program = new IntCode({ program: input });
 
-  let inputStream = new Stream("[inp]", { debug: false });
-  let output = new Stream("[out]", { debug: false });
-
-  run("[]", program.slice(), inputStream, output);
+  program.run();
 
   let map = new LocationMap();
 
   // PART 1:
   let intersectionSum = 0;
   try {
-    while (output.hasNext()) {
+    while (program.hasNextOutput()) {
       for (let x = 0, y = 0; ; x++) {
-        const got = await output.read();
+        const got = await program.read();
         const gotStr = String.fromCharCode(got);
         if (gotStr === "\n") {
           x = -1;
@@ -55,7 +52,9 @@ async function calc(programInput, program) {
   // return intersectionSum;
 
   // PART 2:
-  program[0] = 2;
+  const program2 = new IntCode({ program: input });
+  program2.program[0] = 2;
+
   const inputString = `
       A,A,B,C,B,A,C,B,C,A
       L,6,R,12,L,6,L,8,L,8
@@ -66,21 +65,14 @@ async function calc(programInput, program) {
 
   // console.log(`[${inputString}]`)
 
-  inputStream = new Stream("[inp]", { debug: false });
-
   for (const val of inputString) {
-    inputStream.write(val.charCodeAt(0));
+    program2.write(val.charCodeAt(0));
   }
 
-  console.log(inputStream.values.join(','))
+  program2.run();
 
-  output = new Stream("[out]", { debug: false });
-
-  run("[]", program, inputStream, output);
-
-  // PART 2:
-  await output.waitForClose();
-  return output.values.join(' ');
+  await program2.waitForClose();
+  return program2.output.values.join(" ");
 
   // PART 2: FIND INSTRUCTIONS TO USE
   // const dirs = [
@@ -130,8 +122,7 @@ async function calc(programInput, program) {
   //   }
   // }
 
-  // // console.log(map.toString());
-  // return intersectionSum;
+  // console.log(map.toString());
 }
 
 function getInput() {
