@@ -1,24 +1,49 @@
 class LocationMap {
+  /**
+   * @param {string} asString
+   */
+  constructor(asString = undefined) {
+    if (asString) {
+      this.data = asString
+        .trim()
+        .replace(/(^|\n) +/g, "$1")
+        .split("\n")
+        .map(x => x.split(""));
+
+      this.maxX = this.data[0].length - 1;
+      this.maxY = this.data.length - 1;
+    }
+  }
+
   x = 0;
   y = 0;
 
+  /**
+   * @type {string[][]}
+   */
   data = [];
   maxSymbolSize = 1;
 
-  minX = 0;
-  minY = 0;
-  maxX = 0;
-  maxY = 0;
+  minX = Infinity;
+  minY = Infinity;
+  maxX = -Infinity;
+  maxY = -Infinity;
 
   /**
    * @param {string} symbol
+   * @param {{x:number; y:number}} pos
    */
-  draw(symbol) {
-    if (!this.data[this.y]) this.data[this.y] = [];
+  draw(symbol, { x, y } = this) {
+    if (!this.data[y]) this.data[y] = [];
 
-    this.data[this.y][this.x] = symbol;
+    this.data[y][x] = symbol;
 
     if (symbol.length > this.maxSymbolSize) this.maxSymbolSize = symbol.length;
+
+    this.minX = Math.min(this.minX, x);
+    this.minY = Math.min(this.minY, y);
+    this.maxX = Math.max(this.maxX, x);
+    this.maxY = Math.max(this.maxY, y);
   }
 
   get(x = this.x, y = this.y) {
@@ -60,6 +85,22 @@ class LocationMap {
     }
 
     return chars.join("");
+  }
+
+  /**
+   * @param {string} symbol
+   */
+  find(symbol) {
+    for (let y = this.minY; y <= this.maxY; y++) {
+      for (let x = this.minX; x <= this.maxX; x++) {
+        const cellSymbol = this.data[y][x];
+        if (symbol === cellSymbol) {
+          return { x, y };
+        }
+      }
+    }
+
+    return undefined;
   }
 }
 
