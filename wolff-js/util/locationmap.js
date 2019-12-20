@@ -10,7 +10,9 @@ class LocationMap {
         .split("\n")
         .map(x => x.split(""));
 
-      this.maxX = this.data[0].length - 1;
+      this.minX = 0;
+      this.minY = 0;
+      this.maxX = this.data.map(x => x.length).max() - 1;
       this.maxY = this.data.length - 1;
     }
   }
@@ -93,7 +95,7 @@ class LocationMap {
   find(symbol) {
     for (let y = this.minY; y <= this.maxY; y++) {
       for (let x = this.minX; x <= this.maxX; x++) {
-        const cellSymbol = this.data[y][x];
+        const cellSymbol = this.data[y] && this.data[y][x];
         if (symbol === cellSymbol) {
           return { x, y };
         }
@@ -101,6 +103,22 @@ class LocationMap {
     }
 
     return undefined;
+  }
+
+  /**
+   * @param {(symbol: string|undefined, pos:{x:number; y:number;}) => void} fn
+   */
+  forEach(fn) {
+    for (let y = this.minY; y <= this.maxY; y++) {
+      for (let x = this.minX; x <= this.maxX; x++) {
+        const cellSymbol = this.data[y] && this.data[y][x];
+        fn(cellSymbol, { x, y });
+      }
+    }
+  }
+
+  clone() {
+    return new LocationMap(this.toString());
   }
 }
 
