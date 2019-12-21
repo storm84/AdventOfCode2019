@@ -1,3 +1,54 @@
+class IntCode {
+  /** @type {string} */
+  prefix;
+  /** @type {number[]} */
+  program;
+  /** @type {Stream} */
+  input;
+  /** @type {Stream} */
+  output;
+
+  /**
+   * @param {{prefix?: string; program?: string|number[]; input?: Stream; output?: Stream; }} param0
+   */
+  constructor({ prefix, program, input, output }) {
+    this.prefix = prefix || "";
+    this.program = Array.isArray(program)
+      ? program
+      : program
+          .trim()
+          .split(",")
+          .map(x => +x);
+
+    this.input = input || new Stream(prefix ? prefix + "-inp " : "[inp] ");
+    this.output = output || new Stream(prefix ? prefix + "-out " : "[out] ");
+  }
+
+  run() {
+    return run(this.prefix, this.program, this.input, this.output);
+  }
+
+  /**
+   *
+   * @param  {number[]} values
+   */
+  write(...values) {
+    this.input.write(...values);
+  }
+
+  read() {
+    return this.output.read();
+  }
+
+  hasNextOutput() {
+    return this.output.hasNext();
+  }
+
+  waitForClose() {
+    return this.output.waitForClose();
+  }
+}
+
 class Stream {
   /** @type {boolean} */
   debug;
@@ -65,14 +116,14 @@ class Stream {
   }
 
   /**
-   * @param {number} value
+   * @param {number[]} values
    */
-  write(value) {
+  write(...values) {
     this._log("write", {
-      value,
+      value: values,
       writeNow: !!this._readPromiseResolver,
     });
-    this.values.push(value);
+    this.values.push(...values);
 
     if (this._readPromiseResolver) {
       this._readPromiseResolver(this.values[++this._lastIndex]);
@@ -228,5 +279,6 @@ async function run(prefix, p, input, output) {
   output.close();
 }
 
+exports.IntCode = IntCode;
 exports.Stream = Stream;
 exports.run = run;
